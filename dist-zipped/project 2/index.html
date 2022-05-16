@@ -1,0 +1,2018 @@
+<!doctype html><html lang="en"><head><title>Bio</title><meta charset="utf-8"><meta name="viewport" content="width=device-width,user-scalable=no,minimum-scale=1,maximum-scale=1"><link href="jquery/jquery.splitter.css" rel="stylesheet"/><style>#container{
+        position:absolute;
+        display: none;
+      }
+
+      #FPSstats{
+        display: none;
+      }
+
+      #threejs{
+        height:100vh!important;
+        width:100vw!important;
+      }
+
+      body {
+        font-family: Monospace;
+        background-color: #000;
+        color: #fff;
+        margin: 0px;
+        overflow: hidden;
+      }
+      #info {
+        color: #fff;
+        position: absolute;
+        top: 5px;
+        width: 100%;
+        text-align: center;
+        z-index: 1;
+        display:block;
+        display:none;
+      }
+      #info a { color: #f00; font-weight: bold; text-decoration: underline; cursor: pointer }
+      #left {
+        top: 60px;
+        position: absolute;
+        height:90%;
+        width: 100%;
+        background-color: rgba(0,0,255,0);
+        pointer-events: none;
+        display:none;
+      }
+      #editor { 
+        height: 100%;
+        width: 100%;
+        background-color: rgba(0,0,0,0.2);
+        pointer-events: auto;
+        display:none;
+      }
+      #output {
+        display:none;
+          position: absolute;
+          top: 80px;
+          right: 10px;
+          height: 90%;
+          width: 450px;
+          background-color: rgba(0,0,0,0.1);
+          border: 0;
+          color: lightGrey;
+          font-family: 'Lucida Console', Monaco, monospace;
+          outline: none;
+          max-width: 450px;
+          margin-bottom: 10px;
+          margin-left: 10px;
+      }
+      #control {
+        margin-top: 20px;
+        height: 30px;
+        padding: 20px;
+        pointer-events: auto;
+      }
+      #dummy {
+        opacity: 0;
+        pointer-events: none;
+      }</style><script src="jquery/jquery.js" charset="utf-8"></script><script src="jquery/jquery.splitter-0.14.0.js"></script><script src="three.js/three.min.js"></script><script id="fxhash-snippet">//---- do not edit the following code (you can indent as you wish)
+      let search = new URLSearchParams(window.location.search)
+      let alphabet = "123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ"
+      var fxhash = search.get('fxhash') || "oo" + Array(49).fill(0).map(_=>alphabet[(Math.random()*alphabet.length)|0]).join('')
+      // var fxhash = 'oo38ouQL7viT2CQ35DrJTEbfzSrc7NjUX8H1GjWRQyAezifkDJT'
+      let b58dec = str=>[...str].reduce((p,c)=>p*alphabet.length+alphabet.indexOf(c)|0, 0)
+      let fxhashTrunc = fxhash.slice(2)
+      let regex = new RegExp(".{" + ((fxhash.length/4)|0) + "}", 'g')
+      let hashes = fxhashTrunc.match(regex).map(h => b58dec(h))
+      let sfc32 = (a, b, c, d) => {
+        return () => {
+          a |= 0; b |= 0; c |= 0; d |= 0
+          var t = (a + b | 0) + d | 0
+          d = d + 1 | 0
+          a = b ^ b >>> 9
+          b = c + (c << 3) | 0
+          c = c << 21 | c >>> 11
+          c = c + t | 0
+          return (t >>> 0) / 4294967296
+        }
+      }
+      var fxrand = sfc32(...hashes)
+      // true if preview mode active, false otherwise
+      // you can append preview=1 to the URL to simulate preview active
+      var isFxpreview = search.get('preview') === "1"
+      // call this method to trigger the preview
+      function fxpreview() {
+        console.log("fxhash: TRIGGER PREVIEW")
+      }
+      //---- /do not edit the following code</script></head><body><div id="left"><div><div id="editor"># Lparser example file color 1 90 138 32 color 2 90 164 33 color 3 89 212 66 color 4 87 229 57 color 5 72 238 53 color 6 58 247 49 color 7 75 248 67 color 8 92 249 86 color 9 97 249 90 color 10 101 249 95 color 11 105 250 99 color 12 110 250 104 color 13 118 251 114 color 14 127 252 124 color 15 127 252 125 color 16 128 253 126 color 17 128 254 127 color 18 128 254 127 color 19 158 254 158 color 20 158 254 158 recursion 15 angle 20 thickness 15 min_thickness 5 shape 1 switch_yz 1 no_wait 1 axiom c(1)b rule b = [&(30)A] rule A = ~(7)$t(.1)F[+(40)C][-(40)C]!(.95)~(7)t(.1)FcA rule C = ~(10)$tF[+(60)L][-(60)L]C rule L = [~(15){-f+f+f-|-f+f+f}] rule F = '(1.3)F'(.77) rule f = '(1.3)f'(.77) #rule ~ = _ # uncomment to remove random efx</div></div><div id="dummy"></div></div><script src="jquery/ace.js" charset="utf-8"></script><script>var editor = ace.edit("editor");
+          editor.setTheme("ace/theme/monokai");
+          editor.getSession().setMode("ace/mode/javascript");
+          editor.session.setOption("useWorker", true);
+          editor.setShowPrintMargin(false);
+          document.getElementById('editor').style.fontSize='14px';</script><script src="three.js/chevrotain.min.js"></script><script src="three.js/bufgeomutils.js"></script><script src="three.js/OrbitControls.js"></script><script src="three.js/VRMLLoader.js"></script><script src="./postprocessing/build/postprocessing.js"></script><script src="three.js/stats.min.js"></script><script src="three.js/daynight.js"></script><script src="lparser/Lparser2.js"></script><script>var sceneObject = null;
+      var loader = null;
+
+      $(function () {
+
+        $('#left').width("100%").height("90%").split({orientation:'vertical', limit:50, position:'30%'});
+        $('.vsplitter').css('pointer-events', 'auto');
+
+        $('#parse').on('click', function () {
+          $('#output').fadeIn("fast");
+          parse();
+        });
+
+        editor.getSession().setValue(`# Lparser example file
+
+color 1     90 138 32
+color 2     90 164 33
+color 3     89 212 66
+color 4     87 229 57
+color 5     72 238 53
+color 6     58 247 49
+color 7     75 248 67
+color 8     92 249 86
+color 9     97 249 90
+color 10    101 249 95
+color 11    105 250 99
+color 12    110 250 104
+color 13    118 251 114
+color 14    127 252 124
+color 15    127 252 125
+color 16    128 253 126
+color 17    128 254 127
+color 18    128 254 127
+color 19    158 254 158
+color 20    158 254 158
+
+recursion 15
+angle 20                                   
+thickness 15
+min_thickness 5
+shape 1
+switch_yz 1
+no_wait 1
+
+axiom c(1)b   
+
+rule b = [&(30)A]
+
+rule A = ~(7)$t(.1)F[+(40)C][-(40)C]!(.95)~(7)t(.1)FcA
+rule C = ~(10)$tF[+(60)L][-(60)L]C
+
+rule L = [~(15){-f+f+f-|-f+f+f}]
+
+rule F = '(1.3)F'(.77)
+rule f = '(1.3)f'(.77)
+
+#rule ~ = _             # uncomment to remove random efx`)
+
+      // console.log(editor.getSession().getValue())
+
+        function parse () {
+          var ls = editor.getSession().getValue();
+          
+          if (ls && ls.length > 0)
+            Module.read_ls(ls);
+          
+          // console.log(ls);
+        }
+        
+        window.editor = editor
+        window.module = Module
+        window.parse = parse()
+
+        $('#files').on('change', function() {
+          var name = $(this).val();
+          $.ajax({
+            url: 'ls/' + name,
+            dataType: 'text',
+            success: function (data) {
+              editor.getSession().setValue(data);
+            }
+          });
+
+        });
+
+        editor.resize(true)
+        
+        window.word = "fern2"
+        
+        setTimeout(function(){
+          // parse()
+          
+          let objects = [
+            
+            {name:"tree5.ls", 
+            lsystem:`# Lparser example file
+
+recursion 12
+angle 5
+thickness 30
+shape 1
+switch_yz 1
+
+axiom c(4)FFS                                          # the actual tree
+
+rule S = FFR>(60)R>(60)R>(60)R>(60)R>(60)R>(30)S       # six branches per segment
+rule R = [Ba]                                          # a single branch
+
+rule a = $tF[Cx]Fb                                    
+rule b = $tF[Dy]Fa
+
+rule B = &B                                            # angle increments
+rule C = +C
+rule D = -D
+
+rule x = a                                             # apical elay
+rule y = b
+
+rule F = '(1.25)F'(.8)                                 # elongation rate
+
+`},
+
+            {name:"spiral1.ls", 
+            lsystem:`# Lparser example file
+
+recursion 20
+angle 10
+thickness 100
+min_thickness 5
+shape 1
+switch_yz 1
+
+axiom a
+
+rule a = Fs+;'a
+rule s = [::c!!!!&&[b]^^^^[b]]
+rule b = F!+F+;'b
+
+`},
+
+            {name:"abop1.ls", 
+            lsystem:`# Lparser example file
+
+# Monopodial skeleton
+#
+# Here is how to read the formulas on page 56 into
+# lparser syntax. The values can be input from page 57,
+# the strings colapsed and used.
+#
+# A = F[ &( a0 ) '( r2 ) !( wr ) BL  ] >( c ) '( r1 ) !( wr ) A
+# B = F[ -( a2 ) '( r2 ) !( wr ) $CL ]        '( r1 ) !( wr ) C
+# C = F[ +( a2 ) '( r2 ) !( wr ) $BL ]        '( r1 ) !( wr ) B
+
+recursion 10
+angle 45
+thickness 15
+shape 1
+switch_yz 1
+
+axiom c(12)FFAL
+
+rule A = F[&'(.8)!BL]>(137)'!(.9)A
+rule B = F[-'(.8)!(.9)$CL]'!(.9)C
+rule C = F[+'(.8)!(.9)$BL]'!(.9)B
+
+rule L = ~c(8){+(30)f-(120)f-(120)f}
+
+`},
+
+            {name:"abop2.ls", 
+            lsystem:`# Lparser example file
+
+# Elaboration of example d on page 56
+# with double the amount of branches
+
+recursion 10
+angle 30
+thickness 20
+shape 1
+switch_yz 1
+
+axiom c(12)FAL
+
+rule A = F[&'(.7)!BL]>(137)[&'(.6)!BL]>(137)'(.9)!(.9)A
+rule B = F[-'(.7)!(.9)$CL]'(.9)!(.9)C
+rule C = F[+'(.7)!(.9)$BL]'(.9)!(.9)B
+
+rule L = ~c(8){+(45)f(.1)-(45)f(.1)-(45)f(.1)+(45)|+(45)f(.1)-(45)f(.1)-(45)f(.1)}
+
+`},
+
+            {name:"abop3.ls", 
+            lsystem:`# Lparser example file
+
+# Ternary skeleton from ABOP on page 60
+
+recursion 13
+angle 30
+thickness 20
+min_thickness 7
+shape 1
+switch_yz 1
+
+axiom c(12)FA
+
+rule A = !(.9)t(.4)FB>(94)B>(132)B
+rule B = [&t(.4)F$A]
+rule F = '(1.25)F'(.8)
+
+`},
+
+            {name:"abop4.ls", 
+            lsystem:`# Lparser example file
+
+# Lychnis structure taken from ABOP on page 84
+
+recursion 45
+angle 18
+thickness 100
+min_thickness 7
+shape 1
+switch_yz 1
+
+axiom c(12)&(20)N
+
+rule N = FII[&(60)rY]>(90)[&(45)'(0.8)rA]>(90)[&(60)rY]>(90)[&(45)'(0.8)rD]!FIK
+
+# leaves
+rule Y = [c(4){++l.--l.--l.++|++l.--l.--l.}]
+rule l = g(.2)l 	# leaves grow in size with recursion level
+
+# flowers
+rule K = [!c(2)FF>w>(72)w>(72)w>(72)w>(72)w]
+rule w = [c(2)^!F][c(5)&(72){-(54)f(3)+(54)f(3)|-(54)f(3)+(54)f(3)}]
+rule f = _  		# removes all flower leaves except of the last recursion
+
+# 7 step delay for A(i)
+rule A = B
+rule B = C
+rule C = D
+rule D = E
+rule E = G
+rule G = H
+rule H = N
+
+# 10 step delay for I(i)
+rule I = FoO
+rule O = FoP
+rule P = FoQ
+rule Q = FoR
+rule R = FoS
+rule S = FoT
+rule T = FoU
+rule U = FoV
+rule V = FoW
+rule W = FoX
+rule X = _
+
+# Changes
+rule o = $t(-0.03)
+rule r = ~(30)
+`},
+
+            {name:"bekerplant.ls", 
+            lsystem:`# bekerplant.ls by C.J. van der Mark        
+ 
+ recursion 6
+ angle 17
+ thickness 300
+ min_thickness 2
+ shape 1
+ switch_yz 1
+ 
+ axiom X>(45)X>(45)X>(45)X>(45)X>(45)X>(45)X>(45)X
+ 
+ rule X = [FFFFFF&(30)FFAYZ] 
+ rule Y = [h+B[+EEEEEE[h+CiDiD][h-CiDiD]][h-EEEEEE[h+CiDiD][h-CiDiD]]]
+ rule Z = [h-B[+EEEEEE[h+CiDiD][h-CiDiD]][h-EEEEEE[h+CiDiD][h-CiDiD]]]
+ rule A = aEA 
+ rule B = EbEbB
+ rule C = aGaGaGaGaGaGaGatGtGC
+ rule D = bHD
+ rule a = &(6)
+ rule b = ^(9)
+ rule F = ?(0.98)'(0.993)F
+ rule h = ~(6)
+ rule i = ?(0.94)i
+ rule E = c(2)F[+(40)^(60)?(0.05)'(4)c(8)F][-(40)^(60)?(0.05)'(4)c(8)F]
+ rule G = c(2)F[+(40)^(60)?(0.03)'(2)c(8)F][-(40)^(60)?(0.03)'(2)c(8)F]
+ rule H = c(2)F[+(40)^(60)?(0.02)'(1)c(8)F][-(40)^(60)?(0.02)'(1)c(8)F]
+ `},
+
+            {name:"cello_plant.ls", 
+            lsystem:`# Lparser example file
+
+recursion 12
+angle 10
+thickness 80
+switch_yz 1
+shape 1
+
+color  1 255   0   0
+color  2 255  64   0
+color  3 255 128   0
+color  4 255 191   0
+color  5 191 255   0
+color  6 128 255   0
+color  7  64 255   0
+color  8   0 255   0
+color  9   0 255  64
+color 10   0 255 128
+color 11   0 255 191
+color 12   0 255 255
+color 13   0 191 255
+color 14   0 128 255
+color 15   0  64 255
+color 16   0   0 255
+color 17  64   0 255
+color 18 128   0 255
+color 19 191   0 255
+color 20 255   0 255
+
+axiom FS
+
+rule S = WZ'!cS
+rule W = R%R>>>>>>>>>R%R>>>>
+rule R = [da%a%g%g]
+rule a = [{nmmn}]
+rule g = [NMMNL]
+rule m = +zm
+rule n = -zn
+rule M = +ZM
+rule N = -ZoN
+rule d = ^d
+rule L = Z';+Z';+Z';+Z';+[&&&l]L
+rule l = [cc{--z++z++z--|--z++z++z}]
+rule o = [---------!!!'''ccZl]
+
+
+`},
+
+            {name:"leaves.ls", 
+            lsystem:`# Lparser example file
+ 
+ recursion 18
+ angle 10	
+ thickness 15	
+ switch_yz 1
+ shape 1
+ 
+ axiom [|FFFFFFFFFFF]P>(90)'P>(90)'P>(90)'P	
+ 
+ rule P = [&(10)G[ccA][ccB][a][b]]
+ rule G = tFtFtFtFtFtFtFtFtFtFtFtFtF
+ 
+ rule A = [+A{.].C.}
+ rule B = [-B{.].C.}
+ rule C = tfC
+ 
+ rule a = [+a]d
+ rule b = [-b]d
+ rule d = tFd
+ 
+ `},
+
+            {name:"passie.ls", 
+            lsystem:`# Lpaser example file by C.J.van der Mark jr.
+
+recursion 10
+angle 20
+thickness 20
+min_thickness 1
+shape 1
+switch_yz 1
+
+# Axioms
+#axiom o                                # the flower
+#axiom L                                # a single leaf
+#axiom &(60)C                           # the middle stem of the plant
+#axiom k                                # middle flower branch
+#axiom b                                # the side branches of the plant, with flower
+
+axiom k"b>(55)"b>(60)'b>(65)b>(55)''b>(80)b   # the whole passieflora like plant
+
+rule b = ['Ao]
+rule k = [''''C^(90)o]
+rule A = $t(.2)F''[+(55)$L][-(55)$L]t(-.1)FA
+rule C = $F'[+(55)$L][-(55)$L]FC
+
+# Plant Leaf
+rule L = F&(30)&(10)cc[D][E]
+rule D = [+D{.].X.}
+rule E = [^(5)-E{.].X.}
+rule X = ^(5)ggggX
+
+# Flower leaf
+rule d = [+d{.].x.}
+rule h = [-h{.].x.}
+rule x = gggx
+
+# Whole flower
+rule o = [&!ce>(90)w>(90)w>(90)w>(90)w>vy>vy>vy>vy>vy>vy>vy>vy>vy>yv>vy>vy>vy>vy>vy>vy>vy>vy]
+
+# Flower stem
+rule e = Z
+
+# Spikes in the flower
+rule v = [ZZc"""""&(90){'''F!!''F!!''F!!''F}]
+
+# Flower female stem and male stems
+rule w = [[sc??c'!!Ft(-.1)F<<''''!!^^^s]&(100)'(0.5)ZZZ[d][h]]
+
+# Colored flower leafs
+rule y = [[ZZcccc&(80)'''{-ff+ff|-ff+ff}][ZZccccc&(60)'''{-f+f|-f+f}][ZZcccccc&(35)''''{-f+f|-f+f}]]
+
+# Singel male/female stem
+rule s = [c^(8)!Ft(-.2)Ft(-.2)Ft(-.2)Fu]
+
+# Pollen holder on male stem
+rule u = [???F]
+
+rule F = '(1.3)F'(.77)
+rule f = '(1.3)f'(.77)
+
+`},
+
+            {name:"spiral2.ls", 
+            lsystem:`# Lparser example file
+
+recursion 8
+angle 10
+thickness 80
+min_thickness 5
+shape 1
+switch_yz 1
+
+color  1 255   0   0
+color  2 255  64   0
+color  3 255 128   0
+color  4 255 191   0
+color  5 191 255   0
+color  6 128 255   0
+color  7  64 255   0
+color  8   0 255   0
+color  9   0 255  64
+color 10   0 255 128
+
+axiom FFFF[C]>>>>>>>>>[C]>>>>>>>>>[C]>>>>>>>>>[C]
+
+rule C = F!^+F^+;'[c---C]C
+
+
+`},
+
+            {name:"spiral_plant.ls", 
+            lsystem:`# Lparser example file 
+# putting several ls files together to create a spiral plant
+
+recursion 12
+angle 30
+thickness 100
+min_thickness 5
+shape 1
+switch_yz 1
+
+axiom [|ffff|?FFFF]&&&^D
+
+rule D = AB!'DcZO
+rule B = [---'''!:D]
+rule A = &+^FLA
+
+rule O = [!iw>>w>>w>>w>>w>>w]
+rule w = [c(6)&{-f+f|-f+f}]
+rule i = ;i
+
+rule L = [--->c!!!!!!!1cl[a][b]]
+rule a = [+a{.].C.}
+rule b = [-b{.].C.}
+rule C = gC
+rule l = 'l
+rule 1 = 2
+rule 2 = 3
+rule 3 = F
+
+`},
+
+            {name:"tree2.ls", 
+            lsystem:`# Lparser example file
+
+recursion 10
+angle 30
+thickness 40
+shape 1
+switch_yz 1
+
+axiom c(12)A
+
+rule A = aaSaaSA
+rule S = '(.8)!(.9)
+
+rule a = tF[&'(.8)!LBL]>(137)[z&'(.7)!LBL]>(137)
+rule B = tF[-'(.8)!(.9)$LCL]'!(.9)C
+rule C = tF[+'(.8)!(.9)$LBL]'!(.9)B
+
+rule L = [~c(8){+(30)f(.2)-(120)f(.2)-(120)f(.2)}]
+
+`},
+
+            {name:"tree3.ls", 
+            lsystem:`# Lparser example file
+
+recursion 13
+angle 30
+thickness 50
+min_thickness 2
+shape 1
+switch_yz 1
+
+axiom c(12)FFFFFA
+
+rule A = !(.8)tFB>(94)C>(132)D
+rule B = [&'t(.5)!(.9)F$AL|zL]
+rule C = [&'t(.4)!(.8)F$AL|zL]
+rule D = [&'t(.3)!(.7)F$AL|zL]
+
+rule L = [~c(8){+(30)f(.5)-(120)f(.5)-(120)f(.5)}]
+
+`},
+
+            {name:"tree4.ls", 
+            lsystem:`# Lparser example file
+
+recursion 8
+angle 30
+thickness 40
+min_thickness 4
+shape 1
+switch_yz 1
+
+axiom c(12)A
+
+rule A = aaSaaSaaSaaSaaSaaSaaSaaSaaSaaB
+rule S = '(.9)!(.9)
+
+rule a = tF[&'(.8)!LBL|zL]>(137)[z&'(.7)!LBL|zL]>(137)
+
+rule B = tFL[-'(.8)!(.9)$LCL|zL]'(.9)!(.9)C
+rule C = tFL[+'(.8)!(.9)$LBL|zL]'(.9)!(.9)B
+
+rule L = [~c(8){+(30)f(.4)-(120)f(.4)-(120)f(.4)}]
+`},
+
+            {name:"tree6.ls", 
+            lsystem:`# Lparser example file
+
+recursion 10
+angle 60
+thickness 20
+shape 2
+switch_yz 1
+
+axiom c(15)T
+
+rule T = CCA
+rule A = CBD>(94)CBD>(132)BD
+rule B = [&CDCD$A]
+rule D = [g(1)Lg(1)Lg(1)Lg(1)Lg(1)Lg(1)L]
+  
+rule C = !(.95)~(5)tF
+
+rule F = '(1.25)F'(.8)
+
+rule L = [~f(2)c(8){+(30)f(2)-(120)f(2)-(120)f(2)}]
+rule f = z
+rule z = _
+
+`},
+
+            {name:"tree7.ls", 
+            lsystem:`# Lparser example
+
+recursion 11
+angle 5
+thickness 30
+shape 1
+switch_yz 1
+
+axiom c(12)T
+
+rule T = [F~(5)FSd]
+rule S = ~(5)FRR[Ba]d>(30)~(5)FRR[Ba]d>(30)!(.8)S
+rule R = [Ba]d>(120)
+
+rule a = ~(10)$F[Cxd]~(10)$Fd!(.8)b
+rule b = ~(10)$F[Dyd]~(10)$Fd!(.8)a
+rule d = [g(3)g(.5)Lg(.5)Lg(.5)Lg(.5)Lg(.5)Lg(.5)L]
+
+rule B = &B
+rule C = +C
+rule D = -D
+
+rule x = a
+rule y = b
+
+rule F = '(1.25)F'(.8)
+
+rule L = [~f(.5)c(8){+(30)f(2)-(120)f(2)-(120)f(2)}]
+rule f = z
+rule z = _
+
+`},
+
+            {name:"fern3.ls",
+            lsystem:`# Lparser example file
+
+color 1     90 138 32
+color 2     90 164 33
+color 3     89 212 66
+color 4     87 229 57
+color 5     72 238 53
+color 6     58 247 49
+color 7     75 248 67
+color 8     92 249 86
+color 9     97 249 90
+color 10    101 249 95
+color 11    105 250 99
+color 12    110 250 104
+color 13    118 251 114
+color 14    127 252 124
+color 15    127 252 125
+color 16    128 253 126
+color 17    128 254 127
+color 18    128 254 127
+color 19    158 254 158
+color 20    158 254 158
+
+recursion 15
+angle 20                                   
+thickness 15
+min_thickness 5
+shape 1
+switch_yz 1
+no_wait 1
+
+axiom c(1)b>(60)b>(60)b
+
+rule b = [&(30)A]
+
+rule A = ~(7)$t(.1)F[+(40)C][-(40)C]!(.95)~(7)t(.1)FcA
+rule C = ~(10)$tF[+(60)L][-(60)L]C
+
+rule L = [~(15){-f+f+f-|-f+f+f}]
+
+rule F = '(1.3)F'(.77)
+rule f = '(1.3)f'(.77)
+
+#rule ~ = _             # uncomment to remove random efx
+
+`},
+
+                         // , "abop5.ls", "abop6.ls"
+                        ]
+          
+          
+          function objectsForEach(name){
+                      // $.ajax({
+            // url: 'ls/' + name,
+            // dataType: 'text',
+            // success: function (data) {
+              editor.getSession().setValue(name.lsystem);
+              // console.log(name.lsystem)
+              window.word = name.name
+              parse();
+              
+            // }
+          // });
+          }
+          
+          objects.forEach(name => objectsForEach(name))
+         
+          fxpreview()
+          
+          
+          
+          
+          
+        }, 1);
+        
+        
+        
+        
+        
+        
+
+      });
+
+
+
+var Module = {
+          preRun: [],
+          postRun: [],
+          print: (function() {
+            var element = document.getElementById('output');
+            if (element) element.value = ''; // clear browser cache
+            return function(text) {
+              text = Array.prototype.slice.call(arguments).join(' ');
+              // console.log(text);
+              if (element) {
+                element.value += text + "\n";
+                element.scrollTop = element.scrollHeight; // focus on bottom
+              }
+            };
+          })(),
+          printErr: function(text) {
+            text = Array.prototype.slice.call(arguments).join(' ');
+            if (0) { // XXX disabled for safety typeof dump == 'function') {
+              dump(text + '\n'); // fast, straight to the real console
+            } else {
+              console.error(text);
+            }
+          },
+          read_ls: function (ls) {
+
+            ccall('do_read_ls', null, ['string'], [ls]);
+          }
+        };
+
+
+
+        var numberOfPlatforms = Math.ceil(fxrand()*5)
+      console.log("numberofplatforms: ", numberOfPlatforms)
+      var platformShape
+      var mixedShape
+      var colorGroups = ["metals", "cools", "warms", "reds", "blues", "purples", "white"] //silver, bronze, gold, red, blue, purple, mixed
+      // var color = [new THREE.Color( 0xffffff ), new THREE.Color( 0xb08d57 ), new THREE.Color( 0xFFD700 ), new THREE.Color( 'red' ), new THREE.Color('blue'), new THREE.Color('purple')] //silver, bronze, gold, red, blue, purple, mixed
+      let color
+      // var wireframe = fxrand() < 0.5 ? true : false;
+      let wireframe = false;
+      console.log(wireframe)
+      
+      // var color =['red', 'blue']
+
+      // const color = ["January", "February", "March", "April", "May", "June", "July"];
+
+      const actualcolor = Math.floor(fxrand() * colorGroups.length);
+      console.log(actualcolor, colorGroups[actualcolor]);      
+      const colorChoice = colorGroups[actualcolor] 
+      //  const colorChoice = "white"
+
+      switch(colorChoice){
+        case "metals":
+        color = [new THREE.Color( 0xffd86e ),new THREE.Color( 0xffb96e ),new THREE.Color( 0x163b2e ),new THREE.Color( 0xffe173 ),new THREE.Color( 0xff7c30 ),new THREE.Color( 0xffff94 ),new THREE.Color( 0xd4947d )]
+          break;
+        
+        case "cools":
+        color = [new THREE.Color( 0x696bff ),new THREE.Color( 0x8f69ff ),new THREE.Color( 0x8b26ff ),new THREE.Color( 0x26beff ),new THREE.Color( 0x8ff7f6 ),new THREE.Color( 0xcc8aff ),new THREE.Color( 0x444bd4 )]
+          break;
+
+        case "warms":
+        color = [new THREE.Color( 0xff7f7d ),new THREE.Color( 0xffa47d ),new THREE.Color( 0xffc07d ),new THREE.Color( 0xffcf7d ),new THREE.Color( 0xffee7d ),new THREE.Color( 0xff9f63 ),new THREE.Color( 0xff9999 )]
+          break;
+
+        case "reds":
+        color = [new THREE.Color( 0xff9999 ),new THREE.Color( 0xe03f3f ),new THREE.Color( 0xf01616 ),new THREE.Color( 0xc73c3c ),new THREE.Color( 0xffb3b3 ),new THREE.Color( 0xc40000 ),new THREE.Color( 0xd42222 )]
+          break;
+        
+        case "blues":
+        color = [new THREE.Color( 0x2a1ed4 ),new THREE.Color( 0x1100ff ),new THREE.Color( 0x4133ff ),new THREE.Color( 0x7f75ff ),new THREE.Color( 0x3f34c9 ),new THREE.Color( 0x766bff ),new THREE.Color( 0x0d00a8 )]
+          break;
+
+        case "purples":
+        color = [new THREE.Color( 0x8000ff ),new THREE.Color( 0x9121ff ),new THREE.Color( 0x8742c9 ),new THREE.Color( 0xaa52ff ),new THREE.Color( 0x9360c4 ),new THREE.Color( 0xcd99ff ),new THREE.Color( 0x7114c9 )]
+          break;
+          case "white":
+        color = [new THREE.Color( 'white' )]
+          break;
+          
+      }
+
+      // var colorMixed = fxrand() < 0.5 ? true : false;
+      var colorMixed = true;
+
+ var container, stats;
+
+var camera, depthOfFieldEffect, controls, scene, renderer, deferredRenderer, effect, sunAngle, dayDuration, starField, skydom, sunLight, sunSphere, composer, effectFXAArenderScene, bloomPass, bloomComposer, finalPass,finalComposer, ground, ground3, renderScene,smaaEffect, noiseEffect, vignetteEffect, renderPass, effectPass, bloomEffect;
+
+
+// import { BloomEffect, EffectComposer, EffectPass, RenderPass } from "./postprocessing";
+
+
+        // if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
+
+       
+        let delta = 0;
+        const materials = {};
+        const darkMaterial = new THREE.MeshBasicMaterial( { color: 'black' } );
+        // var bloomLayer = new THREE.Layers();
+        // bloomLayer.set( 1 );
+        const ENTIRE_SCENE = 0, BLOOM_SCENE = 1;
+
+// const bloomLayer = new THREE.Layers();
+// bloomLayer.set( BLOOM_SCENE );
+        sunAngle = 1/6*Math.PI*2;
+        // sunAngle = 3.14
+        var onRenderFcts= [];
+
+        var cross;
+
+        init2();
+
+
+
+
+        function init2() {
+
+
+          camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.01, 1e10 );
+          camera.position.set(-10,25,220);
+          // camera.layers.enable(1)
+          
+          
+
+          // renderer = new THREE.WebGLRenderer( { antialias: true, alpha: true } );
+
+          renderer = new THREE.WebGLRenderer({
+    powerPreference: "high-performance",
+    antialias: false,
+    stencil: false,
+    depth: false
+});
+
+// const bgColor = new THREE.Color(0x151515);
+	// renderer.setClearColor(bgColor.convertSRGBToLinear());
+	// renderer.setPixelRatio(window.devicePixelRatio);
+
+
+          renderer.setSize( window.innerWidth*2, window.innerHeight*2 );  
+          // renderer.setClearColor( 0x101000 );
+          // renderer.toneMappingExposure = Math.pow( 1.2, 4.0 ) 
+          scene = new THREE.Scene();
+
+
+          // renderer.autoClear = false;
+
+          renderer.physicallyCorrectLights = true;
+
+          // renderer.sortObjects = false;
+          renderer.shadowMap.enabled = true;
+          renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+
+
+
+
+
+
+          $('body').append( '<div class="container"></div>');
+          renderer.domElement.id="threejs"
+          $('.container').append( renderer.domElement );
+
+
+
+          // const 
+// The EffectComposer manages and runs passes. It is common practice to use a RenderPass as the first pass to automatically clear the buffers and render a scene for further processing. Fullscreen image effects are rendered via the EffectPass. Please refer to the usage example of three.js for more information on how to setup the renderer, scene and camera.
+
+
+
+// composer = new POSTPROCESSING.EffectComposer(renderer);
+// composer.addPass(new POSTPROCESSING.RenderPass(scene, camera));
+// // composer.addPass(new POSTPROCESSING.EffectPass(camera, new POSTPROCESSING.BloomEffect()));
+
+  smaaEffect = new POSTPROCESSING.SMAAEffect();
+	// noiseEffect = new POSTPROCESSING.NoiseEffect({ premultiply: true });
+	// vignetteEffect = new POSTPROCESSING.VignetteEffect();
+  let bloomOptions = {
+			blendFunction: POSTPROCESSING.BlendFunction.SCREEN,
+      blendMode: "SCREEN",
+			kernelSize: POSTPROCESSING.KernelSize.VERY_SMALL,
+      blurScale: 0.7,
+			luminanceThreshold: 0.3,
+			luminanceSmoothing: 0.35,
+			height: 1080
+		};
+
+    depthOfFieldEffect = new POSTPROCESSING.DepthOfFieldEffect(camera, {
+			focusDistance: 0.027,
+			focalLength: 0.26,
+			bokehScale: 5.0,
+			height: 1080
+		});
+
+
+
+  //   const smaaEffect = new SMAAEffect(
+	// 		assets.get("smaa-search"),
+	// 		assets.get("smaa-area"),
+	// 		SMAAPreset.HIGH,
+	// 		EdgeDetectionMode.DEPTH
+	// 	);
+
+	// 	smaaEffect.edgeDetectionMaterial.setEdgeDetectionThreshold(0.01);
+
+
+
+	// 	const depthEffect = new DepthEffect({
+	// 		blendFunction: BlendFunction.SKIP
+	// 	});
+
+	// 	const vignetteEffect = new VignetteEffect({
+	// 		eskil: false,
+	// 		offset: 0.35,
+	// 		darkness: 0.5
+	// 	});
+
+	// 	const cocTextureEffect = new TextureEffect({
+	// 		blendFunction: BlendFunction.SKIP,
+	// 		texture: depthOfFieldEffect.renderTargetCoC.texture
+	// 	});
+
+	// 	const effectPass = new EffectPass(
+	// 		camera,
+	// 		depthOfFieldEffect,
+	// 		vignetteEffect,
+	// 		cocTextureEffect,
+	// 		depthEffect
+	// 	);
+
+	// 	const smaaPass = new EffectPass(camera, smaaEffect);
+
+	// 	this.depthEffect = depthEffect;
+	// 	this.vignetteEffect = vignetteEffect;
+	// 	this.depthOfFieldEffect = depthOfFieldEffect;
+	// 	this.cocTextureEffect = cocTextureEffect;
+
+	// 	this.effectPass = effectPass;
+	// 	this.smaaPass = smaaPass;
+
+	// 	composer.addPass(effectPass);
+	// 	composer.addPass(smaaPass);
+
+	// }
+
+
+  bloomEffect = new POSTPROCESSING.BloomEffect(bloomOptions)
+
+	smaaEffect.edgeDetectionMaterial.edgeDetectionThreshold = 0.05;
+	// noiseEffect.blendMode.opacity.value = 0.75;
+
+	renderPass = new POSTPROCESSING.RenderPass(scene, camera);
+	effectPass = new POSTPROCESSING.EffectPass(camera, 
+  smaaEffect, 
+  bloomEffect, 
+  // depthOfFieldEffect
+  );
+
+	composer = new POSTPROCESSING.EffectComposer(renderer);
+  // composer.autoclear = false;
+	composer.addPass(renderPass);
+  // renderPass.renderToScreen = true;
+	composer.addPass(effectPass);
+console.log("set up composer!")
+  // composer.passes[0].scene = scene
+
+
+// const smaaEffect = new POSTPROCESSING.SMAAEffect(
+// 			// assets.get("smaa-search"),
+// 			// assets.get("smaa-area"),
+// 			// SMAAPreset.HIGH,
+// 			POSTPROCESSING.EdgeDetectionMode.DEPTH
+// 		);
+
+// 		smaaEffect.edgeDetectionMaterial.setEdgeDetectionThreshold(0.01);
+
+// 		const bloomOptions = {
+// 			blendFunction: POSTPROCESSING.BlendFunction.SCREEN,
+// 			kernelSize: POSTPROCESSING.KernelSize.MEDIUM,
+// 			luminanceThreshold: 0.4,
+// 			luminanceSmoothing: 0.1,
+// 			height: 480
+// 		};
+
+// 		/* If you don't need to limit bloom to a subset of objects, consider using
+// 		the basic BloomEffect for better performance. */
+// 		const bloomEffect = new POSTPROCESSING.BloomEffect(bloomOptions);
+
+// 		const selectiveBloomEffect = new POSTPROCESSING.SelectiveBloomEffect(
+// 			scene,
+// 			camera,
+// 			bloomOptions
+// 		);
+
+// 		selectiveBloomEffect.inverted = true;
+
+// 		// this.effectA = bloomEffect;
+// 		// this.effectB = selectiveBloomEffect;
+
+// 		const effectPassA = new POSTPROCESSING.EffectPass(
+// 			camera,
+// 			smaaEffect,
+// 			bloomEffect
+// 		);
+
+		// const effectPassB = new EffectPass(
+		// 	camera,
+		// 	smaaEffect,
+		// 	selectiveBloomEffect
+		// );
+
+		// this.passA = effectPassA;
+		// this.passB = effectPassB;
+
+		// effectPassA.renderToScreen = true;
+		// effectPassB.renderToScreen = true;
+		// effectPassB.setEnabled(false);
+
+		// composer.addPass(effectPassA);
+		// composer.addPass(effectPassB);
+
+
+
+
+
+
+// requestAnimationFrame(function render() {
+
+//     requestAnimationFrame(render);
+    
+
+// });
+
+
+
+          // composer = new THREE.EffectComposer(renderer);
+          // var sunRenderModel = new THREE.RenderPass(scene, camera);
+          // var effectBloom = new THREE.BloomPass(1, 25, 5);
+          // var sceneRenderModel = new THREE.RenderPass(scene, camera);
+          // var effectCopy = new THREE.ShaderPass(THREE.CopyShader);
+          
+          // effectCopy.renderToScreen = true;
+          // composer.addPass(new THREE.RenderPass(scene, camera));
+          // composer.addPass(sunRenderModel);
+          // composer.addPass(effectBloom);
+          // composer.addPass(effectCopy);
+
+          // composer = new THREE.EffectComposer( renderer );
+          
+          // const renderPass = new THREE.RenderPass( scene, camera );
+          // composer.addPass( renderPass );
+
+          // const bloomPass = new THREE.UnrealBloomPass( new THREE.Vector2( window.innerWidth, window.innerHeight ), 1.5, 0.4, 0.85 );
+
+// const bloomPass = new THREE.BloomPass();
+          // composer.addPass( bloomPass );
+
+
+
+          // this._renderer = new WebGLRenderer({canvas});
+// deferredRenderer = new THREE.WebGLDeferredRenderer({renderer: renderer});
+// deferredRenderer.forwardRendering = false;
+
+// and then (on resize)
+// this._
+
+// And inside the render loop:
+
+          
+          // renderer.gammaFactor = 1.2;
+          // renderer.gammaOutput = true;
+
+          // renderer.setClearColor(0xEEEEEE);
+
+          // const renderScene = new THREE.RenderPass( scene, camera );
+
+          
+          
+          controls = new THREE.OrbitControls( camera, renderer.domElement );
+
+          controls.target = new THREE.Vector3( 110, 0, 110 );
+
+          
+          
+          // const cube2 = new THREE.Mesh( new THREE.BoxGeometry( 1, 1, 1 ), new THREE.MeshBasicMaterial( {color: 0x00ff00} ));
+          // scene.add( cube2 );
+          // cube2.translateX(110)
+          // cube2.translateZ(110)
+          // cube2.scale.set(10,10,10)
+
+          controls.autoRotate = true;
+          controls.rotateSpeed = 1;
+          controls.autoRotateSpeed = 0.1;
+          controls.zoomSpeed = 1;
+          
+
+          controls.noZoom = false;
+          controls.noPan = false;
+
+          
+          // scene.background = new THREE.Color( 0xffffff );
+          scene.add( camera );
+          
+          // sunSphere	= new THREEx.DayNight.SunSphere()
+// scene.add( sunSphere.object3d )
+          sunLight	= new THREEx.DayNight.SunLight()
+scene.add( sunLight.object3d )
+
+// moonLight	= new THREEx.DayNight.MoonLight()
+// scene.add( moonLight.object3d )
+
+          skydom	= new THREEx.DayNight.Skydom()
+scene.add( skydom.object3d )
+          starField	= new THREEx.DayNight.StarField()
+scene.add( starField.object3d )
+          
+          onRenderFcts.push(function(delta, now){
+	sunAngle	+= delta/dayDuration * Math.PI*2
+  // console.log(sunAngle)
+  
+          // sunSphere.update(sunAngle)
+          sunLight.update(sunAngle)
+          // moonLight.update(sunAngle)
+          skydom.update(sunAngle)
+          starField.update(sunAngle)
+  })
+          
+    // let mainLight = new THREE.PointLight(0xffffff, 50);
+    // const ambientLight = new THREE.HemisphereLight(0xddeeff, 0x0f0e0d, 0.4);
+
+    // mainLight.position.set(-30, 10, -20);
+    // mainLight.castShadow = true;
+
+    // mainLight.shadow.mapSize.width = 256;
+    // mainLight.shadow.mapSize.height = 256;
+    // mainLight.shadow.camera.near = 0.5;
+    // mainLight.shadow.camera.far = 1000;
+
+    // mainLight.name = "mainLight";
+    // ambientLight.name = "ambientLight";
+
+    // scene.add(mainLight);
+    // scene.add(ambientLight)
+
+          // light
+
+          // scene.add( new THREE.AmbientLight( 0x404040 ) );
+
+          // var dirLight = new THREE.DirectionalLight( 0xffffff, 0.8 );
+          // dirLight.position.set( 1, 1, 1 ).normalize();
+          // dirLight.castShadow = true;
+          // camera.add( dirLight );
+          // camera.add( dirLight.target );
+          
+          //  let groundMaterial = new THREE.MeshPhysicalMaterial({
+          //   color: new THREE.Color( 0xffffff ),
+          //   side: THREE.DoubleSide,
+          //   // transparent:true,
+          //   // opacity:1
+          //   depthWrite: true,
+          //   depthTest: true,
+          //   // flatShading: false
+          // });
+
+          let colorChoiceObject 
+
+if(true){
+// var color = ["0xffffff", "0xb08d57", "0xFFD700", "red", "blue", "purple"] //silver, bronze, gold, red, blue, purple, mixed
+const actualcolorreal = Math.floor(fxrand() * color.length);
+colorChoiceObject = color[actualcolorreal]
+} else {
+//if color is not mixed
+colorChoiceObject = colorChoice
+}
+
+// colorChoiceObject = 'red'
+
+
+
+
+
+
+
+
+
+const groundMaterial = new THREE.MeshPhongMaterial({
+color: colorChoiceObject,
+wireframe: wireframe,
+// opacity:1,
+// transparent: false,
+side: THREE.DoubleSide,
+depthWrite: true,
+depthTest: true,
+flatShading: false
+});
+
+            let groundMaterial2 = new THREE.MeshBasicMaterial({
+            color: new THREE.Color( 0x000000 ),
+            // side: THREE.DoubleSide,
+            // transparent:false,
+            // opacity:1,
+            // depthWrite: true,
+            // depthTest: true,
+            // flatShading: false
+          });
+
+    groundMaterial.receiveShadow = true;
+          groundMaterial.castShadow = false;
+
+    // let groundGeometry = new THREE.BoxGeometry(500, 500, 0.01);
+          let groundGeometry = new THREE.CylinderGeometry( 180, 180, 4, 300 );
+          // groundGeometry.computeVertexNormals();
+          let groundGeometry2 = new THREE.CylinderGeometry( 185, 185, 20, 300 );
+          
+
+    // groundGeometry.receiveShadow = true;
+
+    ground = new THREE.Mesh(groundGeometry, groundMaterial);
+    // let ground2 = new THREE.Mesh(groundGeometry2, groundMaterial2);
+
+    // ground.position.y = -5;
+    // ground.rotation.x = - Math.PI / 2;
+    // ground
+    ground.receiveShadow = true;
+    // ground.castShadow = true;
+
+    // ground.doubleSided = true;
+    // ground2.castShadow=false;
+    // ground2.receiveShadow=false;
+    // scene.add(ground2);
+    // ground2.translateY(-12)
+    // ground.layers.enable(0);
+    scene.add(ground);
+
+    ground.translateZ(110)
+    ground.translateX(110)
+    ground.translateY(-2)
+
+
+
+    let groundGeometry3 = new THREE.CylinderGeometry( 20, 20, 20, 300 );
+
+          // groundGeometry.computeVertexNormals();
+          // let groundGeometry2 = new THREE.CylinderGeometry( 185, 185, 20, 300 );
+          
+
+    // groundGeometry.receiveShadow = true;
+    let groundMaterial3 = new THREE.MeshBasicMaterial({
+            color: new THREE.Color( 'red' ),
+            // side: THREE.FrontSide,
+            transparent:true,
+            opacity:1
+            // depthWrite: true,
+            // depthTest: true,
+            // flatShading: false
+          });
+
+    let groun3
+    ground3 = new THREE.Mesh(groundGeometry3, groundMaterial3);
+    // ground3.layers.enable(1)
+    // scene.add(ground3)
+    ground3.translateZ(170)
+    ground3.translateX(170)
+
+
+    // ground.renderOrder = 1;
+    
+          
+
+
+
+
+          // mesh.castShadow = true;
+         
+
+
+
+          // const ENTIRE_SCENE = 0, BLOOM_SCENE = 1;
+
+// const bloomLayer = new THREE.Layers();
+// bloomLayer.set( BLOOM_SCENE );
+
+// const params = {
+//   exposure: 1,
+//   bloomStrength: 0.3,
+//   bloomThreshold: 0.1,
+//   bloomRadius: 0.1,
+//   scene: 'Scene with Glow'
+// };
+
+// const darkMaterial = new THREE.MeshBasicMaterial( { color: 'black' } );
+// const materials = {};
+
+// const renderer = new THREE.WebGLRenderer( { antialias: true } );
+// renderer.setPixelRatio( window.devicePixelRatio );
+// renderer.setSize( window.innerWidth, window.innerHeight );
+// renderer.toneMapping = THREE.ReinhardToneMapping;
+// document.body.appendChild( renderer.domElement );
+
+// const scene = new THREE.Scene();
+
+// const camera = new THREE.PerspectiveCamera( 40, window.innerWidth / window.innerHeight, 1, 200 );
+// camera.position.set( 0, 0, 20 );
+// camera.lookAt( 0, 0, 0 );
+
+// const controls = new OrbitControls( camera, renderer.domElement );
+// controls.maxPolarAngle = Math.PI * 0.5;
+// controls.minDistance = 1;
+// controls.maxDistance = 100;
+// controls.addEventListener( 'change', render );
+
+// scene.add( new THREE.AmbientLight( 0x404040 ) );
+
+// renderScene = new THREE.RenderPass( scene, camera );
+
+// bloomPass = new THREE.UnrealBloomPass( new THREE.Vector2( window.innerWidth*2, window.innerHeight*2 ), 1.5, 0.4, 0.85 );
+// bloomPass.threshold = params.bloomThreshold;
+// bloomPass.strength = params.bloomStrength;
+// bloomPass.radius = params.bloomRadius;
+
+// bloomComposer = new THREE.EffectComposer( renderer );
+// bloomComposer.renderToScreen = false;
+// bloomComposer.addPass( renderScene );
+// bloomComposer.addPass( bloomPass );
+
+// finalPass = new THREE.ShaderPass(
+//   new THREE.ShaderMaterial( {
+//     uniforms: {
+//       baseTexture: { value: null },
+//       bloomTexture: { value: bloomComposer.renderTarget2.texture }
+//     },
+//     vertexShader: document.getElementById( 'vertexshader' ).textContent,
+//     fragmentShader: document.getElementById( 'fragmentshader' ).textContent,
+//     defines: {}
+//   } ), 'baseTexture'
+// );
+// finalPass.needsSwap = true;
+
+// finalComposer = new THREE.EffectComposer( renderer );
+// finalComposer.addPass( renderScene );
+// finalComposer.addPass( finalPass );
+
+
+
+
+
+//  const renderScene = new THREE.RenderPass( scene, camera );
+
+
+// const bloomPass = new THREE.UnrealBloomPass( new THREE.Vector2( window.innerWidth*2, window.innerHeight*2 ), 1.5, 0.4, 0.85 );
+//   bloomPass.threshold = 0.21
+//   bloomPass.strength = 1.2
+//   bloomPass.radius = 0.55
+// // bloomPass.radius = 0.1
+// bloomPass.renderToScreen = true;
+// // renderScene.renderToScreen = true;
+
+// composer = new THREE.EffectComposer( renderer );
+// composer.addPass( renderScene );
+// composer.addPass( bloomPass );
+
+
+
+
+          loader = new THREE.VRMLLoader();
+          // loader.addEventListener( 'load', function ( event ) {
+
+            // scene.add(event.content);
+            
+
+            
+            
+          // } );
+
+          // renderer
+
+
+          // container = document.createElement( 'div' );
+          // container.domElement.style.width = 500;
+
+          
+          // deferredRenderer.setSize( window.innerWidth, window.innerHeight);
+
+          stats = new Stats();
+          stats.domElement.style.position = 'absolute';
+          stats.domElement.style.top = '0px';
+          stats.domElement.style.right = '0px';
+          stats.domElement.id = "FPSstats"
+          $('.container').append( stats.domElement );
+
+          //
+
+          window.addEventListener( 'resize', onWindowResize, false );
+  // effect = new OutlineEffect( renderer );
+
+
+
+          /** COMPOSER */
+          // renderScene = new THREE.RenderPass( scene, camera )
+	
+  // effectFXAA = new THREE.ShaderPass( THREE.FXAAShader )
+  // effectFXAA.uniforms.resolution.value.set( 1 / window.innerWidth*2, 1 / window.innerHeight*2 )
+    
+  // bloomPass = new THREE.UnrealBloomPass( new THREE.Vector2( window.innerWidth*2, window.innerHeight*2 ), 1.5, 0.4, 0.85 )
+  // bloomPass.threshold = 0.21
+  // bloomPass.strength = 1.2
+  // bloomPass.radius = 0.55
+  // bloomPass.renderToScreen = true
+    
+  // composer = new THREE.EffectComposer( renderer )
+  // composer.setSize( window.innerWidth*2, window.innerHeight*2 )
+    
+  // composer.addPass( renderScene )
+  // composer.addPass( effectFXAA )
+  // composer.addPass( bloomPass )
+  // composer.addPass( renderScene )
+    
+  // renderer.gammaInput = true
+  // renderer.gammaOutput = true
+  // renderer.toneMappingExposure = Math.pow( 0.9, 4.0 ) 
+
+          animate();
+          
+
+        }
+
+        function onWindowResize() {
+
+          camera.aspect = window.innerWidth / window.innerHeight;
+          camera.updateProjectionMatrix();
+
+          renderer.setSize( window.innerWidth*2 , window.innerHeight*2 );
+          // bloomComposer.setSize( window.innerWidth*2 , window.innerHeight*2 );
+				// finalComposer.setSize( window.innerWidth*2 , window.innerHeight*2 );
+          // deferredRenderer.setSize( window.innerWidth, window.innerHeight);
+
+          //controls.handleResize();
+
+        }
+
+        function animate() {
+
+//           function restoreMaterial( obj ) {
+
+// if ( materials[ obj.uuid ] ) {
+
+//   obj.material = materials[ obj.uuid ];
+//   delete materials[ obj.uuid ];
+
+// }
+
+// }
+
+
+
+//           function darkenNonBloomed( obj ) {
+
+// if ( obj.isMesh && bloomLayer.test( obj.layers ) === false ) {
+
+//   materials[ obj.uuid ] = obj.material;
+//   obj.material = darkMaterial;
+
+// }
+
+// }
+
+
+
+//           function renderBloom( mask ) {
+
+// if ( mask === true ) {
+
+//   scene.traverse( darkenNonBloomed );
+//   bloomComposer.render();
+//   scene.traverse( restoreMaterial );
+
+// } else {
+
+//   camera.layers.set( BLOOM_SCENE );
+//   bloomComposer.render();
+//   camera.layers.set( ENTIRE_SCENE );
+
+// }
+
+// }
+
+
+
+
+
+
+
+          
+          // renderer.autoClear = false;
+          
+          // begining position
+
+// the day duraction in seconds
+dayDuration	= 300
+// then you periodically update it
+
+  
+  var lastTimeMsec= null
+  let nowMsec = Date.now()
+  		lastTimeMsec	= lastTimeMsec || nowMsec-1000/60
+		var deltaMsec	= Math.min(200, nowMsec - lastTimeMsec)
+		lastTimeMsec	= nowMsec
+		// call each update function
+		onRenderFcts.forEach(function(onRenderFct){
+			onRenderFct(deltaMsec/1000, nowMsec/1000)
+
+
+
+
+		})
+
+    controls.update()
+
+
+    // switch ( params.scene ) {
+
+// case 'Scene only':
+  // renderer.render( scene, camera );
+  // console.log(composer)
+  composer.render();
+  // console.log(composer)
+  // break;
+// case 'Glow only':
+  // renderBloom( false );
+  // break;
+// case 'Scene with Glow':
+// default:
+  // render scene with bloom
+  // renderer.autoClear = false;
+  // renderBloom( true );
+  // renderer.clearDepth()
+
+  // render the entire scene, then render bloom scene on top
+  // finalComposer.render();
+  // renderer.clearDepth()
+  // renderer.render()
+  // break;
+
+// }
+
+
+
+  // renderer.autoClear = false;
+  // renderer.clear();
+  
+  // camera.layers.set(1);
+  // composer.renderToScreen = true;
+  // composer.render();
+  
+  
+  // renderer.clearDepth();
+  // camera.layers.set(0);
+  // renderer.render(scene, camera);
+  
+  
+
+
+          
+
+          // controls.update();
+          // renderer.render( scene, camera );
+          
+          // deferredRenderer.render(this._world, Game.visibleCamera);
+          stats.update();
+          // composer.render();
+          requestAnimationFrame( animate );
+
+        }
+
+        
+
+
+        function init(wrl) {
+          // console.log(wrl)
+
+          // if (sceneObject)
+            // scene.remove(sceneObject);
+
+          // window.setTimeout(function () {
+          //   $('#output').fadeOut("slow", function () {
+          //     $('#output').val("");
+          //   });
+          // }, 8000);
+
+          // window.setTimeout(function () { 
+            sceneObject = loader.parse(wrl);
+            // sceneObject.castShadow = true;
+            // sceneObject.receiveShadow = true;
+            //  console.log(sceneObject)
+
+var mergedGeoms = []; // merge array
+      sceneObject.children.forEach(child => mergedGeoms.push(child.geometry))
+var mergedBoxes = THREE.BufferGeometryUtils.mergeBufferGeometries( mergedGeoms )
+            // console.log(mergedBoxes)
+          
+            
+
+            //CHOOSE COLOR FOR NOTHING
+
+
+                    const material = new THREE.MeshPhongMaterial({
+            color: "red"
+            // opacity: 1,
+            // transparent: false,
+            // side: THREE.DoubleSide,
+            // depthWrite: true,
+            // depthTest: true,
+            // flatShading: false
+        });
+
+
+
+            
+            sceneObject = new THREE.Mesh(mergedBoxes, material);
+            // scene.add(sceneObject);
+            
+          
+            
+            
+//             let scale = fxrand()*0.1
+//             sceneObject.scale.set(scale,scale,scale)
+//                         scene.traverse (function (object) {
+//                 if (object instanceof THREE.Mesh) {
+//                   object.material.specular = object.material.ambient = object.material.color;
+//                   object.material.shininess = 30;
+//                   // object.material.receiveShadow = true;
+//                   // object.material.castShadow=true;
+//                   // object.receiveShadow = true;
+//                   object.castShadow=true;
+                  
+//                 }
+//             });
+          
+          
+          let numberOfIterations = 10;
+                        if (window.word == undefined){
+                window.word = "fern2.ls"
+              }
+              
+              switch(window.word){
+              case "fern2.ls":
+                  numberOfIterations = 300
+              // scale2 = fxrand()*0.1
+              // sceneObject2.scale.set(scale2,scale2,scale2)
+              break;
+                  
+              case "fern3.ls":
+                  numberOfIterations = 200
+              // scale2 = fxrand()*0.1
+              // sceneObject2.scale.set(scale2,scale2,scale2)
+              break;
+                  
+              case "tree5.ls":
+                  numberOfIterations = 10
+              // scale2 = fxrand()*1
+              // sceneObject2.scale.set(scale2,scale2,scale2)
+              break;
+                  
+              case "spiral1.ls":
+                  numberOfIterations = 4
+              // scale2 = fxrand()*10
+              // sceneObject2.scale.set(scale2,scale2,scale2)
+              break;
+                  
+              case "cello_plant.ls":
+                numberOfIterations = 5
+              break;
+                  
+              case "":
+              break;
+                  
+              case "":
+              break;
+                  
+              case "":
+              break;
+                  
+              case "":
+              break;
+                  
+              case "":
+              break;
+                  
+              case "":
+              break;
+                  
+              case "":
+              break;
+                  
+              
+              }
+          
+            
+            for(var i=0;i<numberOfIterations;i++){
+
+            //CHOOSE COLOR FOR OBJECT
+
+            let colorChoiceObject 
+
+            if(colorMixed){
+            // var color = ["0xffffff", "0xb08d57", "0xFFD700", "red", "blue", "purple"] //silver, bronze, gold, red, blue, purple, mixed
+            const actualcolorreal = Math.floor(fxrand() * color.length);
+            colorChoiceObject = color[actualcolorreal]
+            } else {
+            //if color is not mixed
+            colorChoiceObject = colorChoice
+            }
+
+            // colorChoiceObject = 'red'
+
+            
+
+
+
+            
+
+
+
+            const newMaterial = new THREE.MeshPhongMaterial({
+            color: colorChoiceObject,
+            wireframe: wireframe,
+            // opacity:1,
+            // transparent: false,
+            side: THREE.DoubleSide,
+            depthWrite: true,
+            depthTest: true,
+            flatShading: false
+        });
+
+
+            let sceneObject2 = new THREE.Mesh( sceneObject.geometry, newMaterial );
+            
+
+
+
+            // sceneObject2.receiveShadow = true;
+            // sceneObject2.castShadow=true;
+            // sceneObject2.layers.enable(1);
+            scene.add(sceneObject2);
+            sceneObject2.translateX(110)
+            sceneObject2.translateZ(110)
+
+              let scale2 = fxrand()*1
+              
+              console.log(window.word)
+              
+              if (window.word == undefined){
+                window.word = "fern2.ls"
+              }
+              
+              switch(window.word){
+              case "fern2.ls":
+              scale2 = fxrand()*0.1
+              sceneObject2.scale.set(scale2,scale2,scale2)
+              break;
+              case "fern3.ls":
+              scale2 = fxrand()*0.1
+              sceneObject2.scale.set(scale2,scale2,scale2)
+              break;
+                  
+              case "tree5.ls":
+              scale2 = fxrand()*1
+              sceneObject2.scale.set(scale2,scale2,scale2)
+              break;
+                  
+              case "spiral1.ls":
+              scale2 = fxrand()*5
+              sceneObject2.scale.set(scale2,scale2,scale2)
+              break;
+                  
+              case "passie.ls":
+              scale2 = fxrand()*0.4
+              sceneObject2.scale.set(scale2,scale2,scale2)
+              break;
+                  
+              case "leaves.ls":
+              scale2 = fxrand()*3
+              sceneObject2.translateY(scale2*10)
+              sceneObject2.scale.set(scale2,scale2,scale2)
+              break;
+                  
+              case "abop3.ls":
+              scale2 = fxrand()*1.5
+              sceneObject2.scale.set(scale2,scale2,scale2)
+              break;
+                  
+              case "abop2.ls":
+              scale2 = fxrand()*6
+              sceneObject2.scale.set(scale2,scale2,scale2)
+              break;
+                  
+              case "abop1.ls":
+              scale2 = fxrand()*6
+              sceneObject2.scale.set(scale2,scale2,scale2)
+              break;
+                  
+              case "abop4.ls":
+              scale2 = fxrand()*0.8
+              sceneObject2.scale.set(scale2,scale2,scale2)
+              break;
+                  
+              case "tree6.ls":
+              scale2 = fxrand()*2
+              sceneObject2.scale.set(scale2,scale2,scale2)
+              break;
+                  
+              case "tree7.ls":
+              scale2 = fxrand()*2
+              sceneObject2.scale.set(scale2,scale2,scale2)
+              break;
+              case "cello_plant.ls":
+              scale2 = fxrand()*1+0.5
+              sceneObject2.translateY(0.9)
+              sceneObject2.scale.set(scale2,scale2,scale2)
+              break;
+                  
+              
+              }
+                 
+                
+              
+              
+
+              
+              
+              sceneObject2.rotateOnAxis(new THREE.Vector3(0,1,0),fxrand()*360)
+              // sceneObject2.rotateOnAxis(new THREE.Vector3(0,0,1),fxrand()*20)
+
+              
+            let neg =1
+            let neg2 =1
+            
+            if(fxrand()<0.5){
+              neg = -1
+              
+            }
+            if(fxrand()<0.5){
+              neg2=-1
+            }
+
+
+            function vec2(x, y) {
+  // 2D vector
+  // is just a object with an x and a y coordinate
+  return {x:x, y:y};  
+}
+
+function vadd(p,
+q){
+return vec2(p.x + q.x, p.y + q.y);
+}
+
+ function vdraw(p){
+// circle(width/2 + p.x, height/2 + p.y, 2); 
+
+
+
+//it's just a point //but how to get the whole solid?
+}
+
+function vcircle(angle,
+radius)
+{
+return vec2(Math.cos(angle) * radius, Math.sin(angle) * radius)
+ }
+
+// function draw() {
+// for (let k = 0; k < 599; k++) {
+let a = (Math.PI*2) * fxrand();
+let r = 100 * Math.sqrt(fxrand())
+// console.log(a,r)
+  // let r = 80*fxrand();
+let a2 = (Math.PI*2) * fxrand();
+let r2 = 150;
+let disc = vcircle(a,
+r);
+let bigcircle0 = vadd (vcircle(a2, r2), vcircle (a2 * -6, r2));
+// let p = vadd (disc , bigcircle0 );
+let p = disc
+// vdraw(p);
+sceneObject2.translateX((p.x)*neg)
+sceneObject2.translateZ((p.y)*neg2)  
+// console.log(p.x, p.y)
+// }
+// }
+              
+            // sceneObject2.translateX((fxrand()*radius)*neg)
+            // sceneObject2.translateZ((fxrand()*radius)*neg2)  
+              
+            scene.traverse (function (object) {
+                if (object instanceof THREE.Mesh) {
+                   object.material.specular = object.material.ambient = object.material.color;
+                  // object.material.flatShading = false;
+                  object.material.shininess = 100;
+                  // object.material.receiveShadow = true;
+                  // object.material.castShadow=true;
+                  // object.receiveShadow = true;
+                  object.castShadow=true;
+                  // object.geometry.computeVertexNormals(true);
+                }
+            });
+            
+            }
+            
+            
+            
+          // }, 10);
+
+        }</script><script type="module" src="./boids/boidsBundle-worker.js" defer="defer"></script><script type="module" src="./boids/boidsBundle.js" defer="defer"></script><script defer="defer" src="./bundle.js"></script></body></html>

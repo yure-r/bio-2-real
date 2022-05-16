@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!--
+      This is the page head - it contains info the browser uses to display the page
+      You won't see what's in the head in the page
+      Scroll down to the body element for the page content
+    -->
+
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="https://glitch.com/favicon.ico" />
+
+    <!-- 
+      This is an HTML comment
+      You can write text in a comment and the content won't be visible in the page
+    -->
+
+    <title>Hello World!</title>
+
+    <!-- Meta tags for SEO and social sharing -->
+    <link rel="canonical" href="https://glitch-hello-website.glitch.me/" />
+    <meta
+      name="description"
+      content="A simple website, built with Glitch. Remix it to get your own."
+    />
+    <meta name="robots" content="index,follow" />
+    <meta property="og:title" content="Hello World!" />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://glitch-hello-website.glitch.me/" />
+
+    <meta
+      property="og:description"
+      content="A simple website, built with Glitch. Remix it to get your own."
+    />
+    <meta
+      property="og:image"
+      content="https://cdn.glitch.com/605e2a51-d45f-4d87-a285-9410ad350515%2Fhello-website-social.png?v=1616712748147"
+    />
+    <meta name="twitter:card" content="summary" />
+
+    <!-- Import the webpage's stylesheet -->
+    <link rel="stylesheet" href="/style.css" />
+
+    <!-- Import the webpage's javascript file -->
+  
+  </head>
+<body>
+  <canvas id="heightmap" width="8000" height="8000" style="position:absolute;"></canvas>
+<canvas id="heightgrd" width="64" height="4000" style="position:absolute;left:257px;"></canvas>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r120/three.min.js" integrity="sha512-kgjZw3xjgSUDy9lTU085y+UCVPz3lhxAtdOVkcO4O2dKl2VSBcNsQ9uMg/sXIM4SoOmCiYfyFO/n1/3GSXZtSg==" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.7/dat.gui.min.js" integrity="sha512-LF8ZB1iTwi4Qvkm4pekHG4a437Y9Af5ZuwbnW4GTbAWQeR2E4KW8WF+xH8b9psevV7wIlDMx1MH9YfPqgKhA/Q==" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.120.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.2/dat.gui.min.js"></script>
+
+  <script src='https://joeiddon.github.io/perlin/perlin.js'></script>
+  
+<script>
+  // const simplex = new SimplexNoise(),
+    // value2d = simplex.noise2D(x, y),
+  
+  var heatVertex = `
+    uniform sampler2D heightMap;
+    uniform float heightRatio;
+    uniform float heightBias;
+    varying vec2 vUv;
+    varying float hValue;
+    void main() {
+      vUv = uv;
+      vec3 pos = position;
+      hValue = texture2D(heightMap, vUv).r;
+      pos.y = hValue * heightRatio;
+      pos.y += heightBias;
+
+      vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
+
+      gl_PointSize = 30. * (1. / - mvPosition.z);
+      gl_Position = projectionMatrix * mvPosition;
+    }
+  `;
+  var heatFragment = `
+    uniform sampler2D gradientMap;
+    varying float hValue;
+
+    void main() {
+      float v = clamp(hValue, 0., 1.);
+      vec3 col = texture2D(gradientMap, vec2(0, v)).rgb;
+      gl_FragColor = vec4(col, 1.) ;
+    }
+  `;
+  
+  var canvasH = document.getElementById("heightmap");
+  canvasH.addEventListener("click", () => {
+    createHeightMap();
+  }, false);
+  var heightMap = new THREE.CanvasTexture(canvasH);
+  var ctx = canvasH.getContext("2d");
+  
+  //console.log(heightMap);
+  createHeightMap();
+  
+  function createHeightMap() {
+    ctx.fillStyle = "black";
+    ctx.fillRect(0, 0, 8000, 8000);
+    for (let i = 0; i < 200; i++) {
+      var x = Math.abs(Math.floor(Math.random() * 8000));
+      var y = Math.abs(Math.floor(Math.random() * 8000));
+      var radius = Math.abs(Math.floor(Math.random()*2000));
+      let grd = ctx.createRadialGradient(x, y, 1, x, y, radius);
+      var h8 = Math.floor(Math.random() * 1000);
+      grd.addColorStop(0, "rgb(" + h8 + "," + h8 + "," + h8 + ")");
+      grd.addColorStop(1, "transparent");
+      ctx.fillStyle = grd;
+      ctx.fillRect(0, 0, 8000, 8000);
+    }
+      
+      // for (let y=0; y<255; y++){
+        
+            
+		// for ( var z = 0; z < gridSize; z ++ ) {
+
+			// for ( var x = 0; x < gridSize; x ++ ) {
+
+				//low frequency noise
+        // simplex.noise2D(x, y),
+        
+				// let lowN = perlin.get(
+				// 	x,
+				// 	y
+				// );
+        
+        // console.log(lowN)
+        // if(lowN < 0.4){
+        //   lowN = 0.4
+        // }
+				// lowN *= lowN;
+
+				//high frequency noise
+// 				let highN = noise(
+// 					5999754664 + ( x + this.offset.x * ( gridSize - 1 ) - this.offset.x ) * this.noiseScale * 6,
+// 					5999754664 + ( z + this.offset.z * ( gridSize - 1 ) - this.offset.z ) * this.noiseScale * 6,
+// 				);
+        
+        // if(highN > 0.6){
+        //   highN = 0.6
+        // }
+        
+				// highN *= highN;
+        
+      
+
+				//multiply with hill and rock range
+				// let terrainHeight = lowN
+        
+        //add noise x, z, terrainheight in the canvas element and maybe it'll work king
+        // console.log(terrainHeight)
+        
+
+  
+  //console.log(heightMap);
+  // createHeightMap();
+  // function createHeightMap() {
+
+        
+        
+        
+        // console.log(this.offset.x, this.offset.z, terrainHeight)
+        
+        
+        //terrainHeight at x and z?
+        // console.log(this.offset.x, this.offset.z, terrainHeight)
+        // let v
+// 				if ( terrainHeight > gridSizeY * 0.6 ) {
+
+// 					let v = ( terrainHeight - gridSizeY * 0.6 ) / gridSizeY * 0.4;
+// 					terrainHeight += v * this.terrainRockRange * ( highN * highN );
+
+
+          
+          
+// 				}
+        
+        
+    // ctx.fillStyle = `rgb(
+    //     ${terrainHeight},
+    //     ${terrainHeight},
+    //     ${terrainHeight})`;
+        
+        ctx.fillRect(x, y, 1, 1);
+        
+      // }
+      
+    // }
+    heightMap.needsUpdate = true;
+  }
+  
+  var canvasG = document.getElementById("heightgrd");
+  canvasG.addEventListener("click", ()=>{
+    createGradMap();
+  }, false);
+  var gradientMap = new THREE.CanvasTexture(canvasG);
+  var ctxG = canvasG.getContext("2d");
+  
+  createGradMap();
+  function createGradMap() {
+    console.log("grad");
+    let grd = ctxG.createLinearGradient(0,4000, 0, 0);
+    var colorAmount = 3 + THREE.MathUtils.randInt(0, 3);
+    var colorStep = 1. / colorAmount; 
+    for (let i = 0; i <= colorAmount; i++){
+      let r = THREE.MathUtils.randInt(0,255);
+      let g = THREE.MathUtils.randInt(0,255);
+      let b = THREE.MathUtils.randInt(0,255);
+      grd.addColorStop(colorStep * i,'rgb(' + r + ',' + g + ',' + b +')');
+    }
+    ctxG.fillStyle = grd;
+    ctxG.fillRect(0, 0, 128, 4000)
+    gradientMap.needsUpdate = true;
+  }
+  
+  document.getElementById("heightmap").classList.toggle("dispNone")
+  document.getElementById("heightgrd").classList.toggle("dispNone")
+  
+  
+//      function keyPressName(myEventKeyName){
+//       var pressedKey;
+//       if(window.event){
+//          pressedKey = myEventKeyName.keyCode;
+//       } else if(myEventKeyName.which)
+//       {
+//          pressedKey = myEventKeyName.which;
+//    }
+//    alert(String.fromCharCode(pressedKey));
+// }
+  
+//   document.body.addEventListener
+  
+  const log = document.getElementById('log');
+
+document.body.addEventListener('keydown', logKey);
+
+function logKey(e) {
+  // console.log( ` ${e.code}`)
+  if(e.code == "KeyM"){
+      document.getElementById("heightmap").classList.toggle("dispNone")
+  } else if(e.code == "KeyG"){
+      document.getElementById("heightgrd").classList.toggle("dispNone")
+  }
+}
+  
+   // KeyM
+// (index):243  KeyG
+  
+  
+</script>
+  
+  <style>
+    .dispNone{
+      display: none;
+    }
+  </style>
+  
+    <script type="module" src="/main.js" defer></script>
+  </body>
+</html>
