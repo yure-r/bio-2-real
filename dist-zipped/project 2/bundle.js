@@ -1,1 +1,0 @@
-(()=>{console.log(fxhash),console.log(fxrand()),window.$fxhashFeatures={colorChoice};const o=document.createElement("div");o.id="container",o.innerText=`\n  random hash: ${fxhash}\n\n  colorChoice: ${$fxhashFeatures.colorChoice}\n\n  some pseudo random values: [ ${fxrand()}, ${fxrand()}, ${fxrand()}, ${fxrand()}, ${fxrand()},... ]\n\n`,document.body.prepend(o)})();
